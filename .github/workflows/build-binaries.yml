@@ -1,0 +1,111 @@
+name: Build Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+      
+      - name: Build Windows binary
+        run: |
+          pyinstaller --clean --noconfirm --onefile --name ezdxf-convert --hidden-import ezdxf --hidden-import ezdxf.addons.drawing --hidden-import ezdxf.addons.drawing.svg --hidden-import ezdxf.addons.drawing.layout --hidden-import ezdxf.addons.drawing.config --hidden-import PIL --hidden-import PIL._imaging --hidden-import ezdxf_converter --hidden-import ezdxf_converter.cli --hidden-import ezdxf_converter.converter --hidden-import ezdxf_converter.utils --hidden-import ezdxf_converter.dwg_handler build_entry.py
+          New-Item -ItemType Directory -Path bin -Force
+          Move-Item dist/build_entry.exe bin/ezdxf-convert-windows.exe
+      
+      - name: Upload Windows binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: ezdxf-convert-windows
+          path: bin/ezdxf-convert-windows.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+      
+      - name: Build Linux binary
+        run: |
+          pyinstaller --clean --noconfirm --onefile --name ezdxf-convert --hidden-import ezdxf --hidden-import ezdxf.addons.drawing --hidden-import ezdxf.addons.drawing.svg --hidden-import ezdxf.addons.drawing.layout --hidden-import ezdxf.addons.drawing.config --hidden-import PIL --hidden-import PIL._imaging --hidden-import ezdxf_converter --hidden-import ezdxf_converter.cli --hidden-import ezdxf_converter.converter --hidden-import ezdxf_converter.utils --hidden-import ezdxf_converter.dwg_handler build_entry.py
+          mkdir -p bin
+          mv dist/build_entry bin/ezdxf-convert-linux
+          chmod +x bin/ezdxf-convert-linux
+      
+      - name: Upload Linux binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: ezdxf-convert-linux
+          path: bin/ezdxf-convert-linux
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+      
+      - name: Build macOS binary
+        run: |
+          pyinstaller --clean --noconfirm --onefile --name ezdxf-convert --hidden-import ezdxf --hidden-import ezdxf.addons.drawing --hidden-import ezdxf.addons.drawing.svg --hidden-import ezdxf.addons.drawing.layout --hidden-import ezdxf.addons.drawing.config --hidden-import PIL --hidden-import PIL._imaging --hidden-import ezdxf_converter --hidden-import ezdxf_converter.cli --hidden-import ezdxf_converter.converter --hidden-import ezdxf_converter.utils --hidden-import ezdxf_converter.dwg_handler build_entry.py
+          mkdir -p bin
+          mv dist/build_entry bin/ezdxf-convert-macos
+          chmod +x bin/ezdxf-convert-macos
+      
+      - name: Upload macOS binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: ezdxf-convert-macos
+          path: bin/ezdxf-convert-macos
+
+  create-release:
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ezdxf-convert-windows/ezdxf-convert-windows.exe
+            ezdxf-convert-linux/ezdxf-convert-linux
+            ezdxf-convert-macos/ezdxf-convert-macos
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

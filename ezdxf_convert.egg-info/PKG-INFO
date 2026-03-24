@@ -1,0 +1,253 @@
+Metadata-Version: 2.4
+Name: ezdxf-convert
+Version: 1.0.0
+Summary: High-performance DXF/DWG to SVG converter using ezdxf library
+Home-page: https://github.com/yourusername/ezdxf-converter
+Author: Your Name
+Keywords: dxf dwg svg cad conversion ezdxf drawing
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: Topic :: Multimedia :: Graphics :: Graphics Conversion
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: ezdxf>=1.0.0
+Requires-Dist: Pillow>=9.0.0
+Dynamic: author
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# ezdxf-convert
+
+High-performance command-line tool for converting DXF and DWG files to SVG format using the ezdxf library.
+
+## Features
+
+- **Fast Conversion**: Optimized for performance with minimal overhead
+- **DXF Support**: Native support for DXF files
+- **DWG Support**: Convert DWG files via ODA File Converter integration
+- **Layer Separation**: Optional grouping of layers in SVG output
+- **Configurable**: Adjust lineweight scaling and other parameters
+- **Performance Metrics**: Track and display conversion timing
+- **Minimal Output**: Performance-first design with optional verbose mode
+
+## Installation
+
+### From Source
+
+```bash
+# Clone or download the repository
+cd ezdxf-converter
+
+# Install with pip
+pip install -e .
+```
+
+### Requirements
+
+- Python 3.8 or higher
+- ezdxf library (installed automatically)
+- ODA File Converter (optional, only needed for DWG files)
+
+## ODA File Converter Setup
+
+To convert DWG files, you need to install the ODA File Converter separately:
+
+1. Download ODA File Converter from: https://www.opendesign.com/guestfiles/oda_file_converter
+2. Install it on your system
+3. Note the installation path (e.g., `C:\Program Files\ODA\ODAFileConverter.exe`)
+
+You can specify the ODA path in two ways:
+
+**Option 1: Command-line flag** (recommended for occasional use)
+```bash
+ezdxf-convert input.dwg --oda-path "C:\Program Files\ODA\ODAFileConverter.exe"
+```
+
+**Option 2: Environment variable** (recommended for regular use)
+```bash
+# Windows (PowerShell)
+$env:ODA_FILE_CONVERTER = "C:\Program Files\ODA\ODAFileConverter.exe"
+
+# Windows (Command Prompt)
+set ODA_FILE_CONVERTER=C:\Program Files\ODA\ODAFileConverter.exe
+
+# Linux/Mac
+export ODA_FILE_CONVERTER=/path/to/ODAFileConverter
+```
+
+## Usage
+
+### Basic Usage
+
+Convert a DXF file to SVG:
+```bash
+ezdxf-convert input.dxf
+```
+
+This creates `input.svg` in the same directory.
+
+### Specify Output Path
+
+```bash
+ezdxf-convert input.dxf -o output/result.svg
+```
+
+### Convert DWG Files
+
+```bash
+ezdxf-convert input.dwg --oda-path "C:\Program Files\ODA\ODAFileConverter.exe"
+```
+
+Or with environment variable set:
+```bash
+ezdxf-convert input.dwg
+```
+
+### Separate Layers into SVG Groups
+
+```bash
+ezdxf-convert input.dxf --layers
+```
+
+This creates SVG groups for each layer, making it easier to manipulate individual layers.
+
+### Adjust Lineweight Scaling
+
+```bash
+ezdxf-convert input.dxf --lineweight-scaling 0.1
+```
+
+Default is 0.05. Increase for thicker lines, decrease for thinner lines.
+
+### Display Performance Metrics
+
+```bash
+ezdxf-convert input.dxf --metrics
+```
+
+Shows timing breakdown for each conversion stage:
+```
+Performance Metrics:
+========================================
+read_dxf                       0.1234s
+render_svg                     0.5678s
+write_svg                      0.0123s
+----------------------------------------
+Total                          0.7035s
+```
+
+### Verbose Output
+
+```bash
+ezdxf-convert input.dxf --verbose
+```
+
+Shows detailed progress information during conversion.
+
+### Complete Example
+
+```bash
+ezdxf-convert residential.dwg \
+  -o output/residential.svg \
+  --oda-path "C:\Program Files\ODA\ODAFileConverter.exe" \
+  --layers \
+  --lineweight-scaling 0.08 \
+  --metrics \
+  --verbose
+```
+
+## Command-Line Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `input` | Input DXF or DWG file path (required) | - |
+| `-o`, `--output` | Output SVG file path | Same as input with .svg extension |
+| `--lineweight-scaling` | Line weight scaling factor | 0.05 |
+| `--layers` | Separate layers into SVG groups | Disabled |
+| `--metrics` | Display performance metrics | Disabled |
+| `--oda-path` | Path to ODA File Converter | From `ODA_FILE_CONVERTER` env var |
+| `--verbose` | Enable verbose output | Disabled |
+| `--version` | Show version and exit | - |
+
+## Performance Tips
+
+1. **Use DXF when possible**: DXF files convert faster than DWG (no ODA overhead)
+2. **Disable metrics**: Only use `--metrics` when needed; it has minimal but measurable overhead
+3. **Batch processing**: Process multiple files with a script to amortize startup costs
+4. **SSD storage**: Use fast storage for input/output files
+5. **Layer separation**: Only use `--layers` when needed; it adds slight overhead
+
+## Troubleshooting
+
+### "ODA File Converter path not specified"
+- You're trying to convert a DWG file without specifying ODA path
+- Solution: Use `--oda-path` flag or set `ODA_FILE_CONVERTER` environment variable
+
+### "ODA File Converter not found"
+- The specified ODA path doesn't exist
+- Solution: Verify the path and ensure ODA File Converter is installed
+
+### "Unsupported file format"
+- Input file is not .dxf or .dwg
+- Solution: Only DXF and DWG files are supported
+
+### "Input file not found"
+- The specified input file doesn't exist
+- Solution: Check the file path and ensure it's correct
+
+### Conversion fails with error
+- Use `--verbose` flag to see detailed error information
+- Check that the input file is valid and not corrupted
+- For DWG files, ensure ODA File Converter is working correctly
+
+## Development
+
+### Project Structure
+
+```
+ezdxf-converter/
+├── ezdxf_converter/          # Main package
+│   ├── __init__.py           # Package initialization
+│   ├── cli.py                # Command-line interface
+│   ├── converter.py          # DXF to SVG conversion
+│   ├── dwg_handler.py        # DWG support via ODA
+│   └── utils.py              # Utilities and metrics
+├── input/                    # Test input files
+├── output/                   # Test output files
+├── main.py                   # Legacy example script
+├── setup.py                  # Package installation
+├── requirements.txt          # Dependencies
+└── README.md                 # This file
+```
+
+### Running from Source
+
+```bash
+# Without installation
+python -m ezdxf_converter.cli input.dxf
+
+# Or directly
+python ezdxf_converter/cli.py input.dxf
+```
+
+## License
+
+MIT License - See LICENSE file for details
+
+## Credits
+
+Built with [ezdxf](https://ezdxf.mozman.at/) - a Python library to create and modify DXF drawings.
