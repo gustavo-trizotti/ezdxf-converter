@@ -1,14 +1,18 @@
 #!/bin/bash
-# Build script for macOS binary
-# Run this on a macOS machine
+set -e
 
 echo "Building ezdxf-convert for macOS..."
 
-# Install PyInstaller if not already installed
-pip install pyinstaller
+# Create isolated environment
+python3.14 -m venv .venv
+source .venv/bin/activate
+
+# Install build dependencies
+python -m pip install --upgrade pip
+python -m pip install pyinstaller ezdxf pillow
 
 # Build the binary
-pyinstaller --clean --noconfirm \
+python -m PyInstaller --clean --noconfirm \
     --onefile \
     --name ezdxf-convert \
     --hidden-import ezdxf \
@@ -25,9 +29,8 @@ pyinstaller --clean --noconfirm \
     --hidden-import ezdxf_converter.dwg_handler \
     build_entry.py
 
-# Move to bin directory
 mkdir -p bin
-mv dist/build_entry bin/ezdxf-convert-macos
+mv dist/ezdxf-convert bin/ezdxf-convert-macos
 chmod +x bin/ezdxf-convert-macos
 
 echo "macOS binary created at: bin/ezdxf-convert-macos"
