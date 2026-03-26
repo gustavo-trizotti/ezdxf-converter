@@ -40,6 +40,8 @@ High-performance command-line tool for converting DXF and DWG files to SVG forma
 - **DXF Support**: Native support for DXF files
 - **DWG Support**: Convert DWG files via ODA File Converter integration
 - **Layer Separation**: Optional grouping of layers in SVG output
+- **Background Color**: Configurable SVG background (DEFAULT, WHITE, BLACK, TRANSPARENT)
+- **Progress Streaming**: Real-time JSON progress events for integration with progress indicators
 - **Configurable**: Adjust lineweight scaling and other parameters
 - **Performance Metrics**: Track and display conversion timing
 - **Minimal Output**: Performance-first design with optional verbose mode
@@ -125,6 +127,30 @@ ezdxf-convert input.dxf --layers
 
 This creates SVG groups for each layer, making it easier to manipulate individual layers.
 
+### Set SVG Background Color
+
+```bash
+ezdxf-convert input.dxf --background WHITE
+```
+
+Options: `DEFAULT` (transparent), `WHITE`, `BLACK`, `TRANSPARENT`
+
+### Stream Progress for Integration
+
+```bash
+ezdxf-convert input.dxf --stream
+```
+
+Outputs progress events as JSON lines to stderr (useful for progress indicators):
+```json
+{"event": "read_start"}
+{"event": "read_complete", "duration": 0.012}
+{"event": "render_start"}
+{"event": "render_complete", "duration": 0.035}
+{"event": "write_start"}
+{"event": "write_complete", "duration": 0.001}
+```
+
 ### Adjust Lineweight Scaling
 
 ```bash
@@ -165,6 +191,8 @@ ezdxf-convert residential.dwg \
   -o output/residential.svg \
   --oda-path "C:\Program Files\ODA\ODAFileConverter.exe" \
   --layers \
+  --background WHITE \
+  --stream \
   --lineweight-scaling 0.08 \
   --metrics \
   --verbose
@@ -178,6 +206,8 @@ ezdxf-convert residential.dwg \
 | `-o`, `--output` | Output SVG file path | Same as input with .svg extension |
 | `--lineweight-scaling` | Line weight scaling factor | 0.05 |
 | `--layers` | Separate layers into SVG groups | Disabled |
+| `--background` | SVG background color (DEFAULT, WHITE, BLACK, TRANSPARENT) | DEFAULT |
+| `--stream` | Stream progress chunks for progress indicator integration | Disabled |
 | `--metrics` | Display performance metrics | Disabled |
 | `--oda-path` | Path to ODA File Converter | From `ODA_FILE_CONVERTER` env var |
 | `--verbose` | Enable verbose output | Disabled |

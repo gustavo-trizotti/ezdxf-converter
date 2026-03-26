@@ -9,6 +9,29 @@ from .utils import detect_file_type, resolve_output_path, PerformanceMetrics, Fi
 from .dwg_handler import get_oda_path, convert_dwg_to_dxf, cleanup_temp_dxf, ODAConverterError
 
 
+def _create_stream_callback(enabled: bool):
+    """Create a streaming callback function for progress reporting."""
+    import json
+    import sys
+    
+    if not enabled:
+        return None
+    
+    def callback(event: str, data: dict = None):
+        """Stream progress events as JSON lines to stderr."""
+        payload = {"event": event}
+        if data:
+            payload.update(data)
+        try:
+            sys.stderr.write(json.dumps(payload) + "\n")
+            sys.stderr.flush()
+        except (BrokenPipeError, OSError):
+            pass  # Ignore if pipe is broken
+    
+    return callback
+
+
+
 def create_parser() -> argparse.ArgumentParser:
     """Create and configure argument parser."""
     parser = argparse.ArgumentParser(
@@ -68,6 +91,19 @@ Environment Variables:
         "--verbose",
         action="store_true",
         help="Enable verbose output"
+    )
+    
+    parser.add_argument(
+        "--background",
+        choices=["DEFAULT", "WHITE", "BLACK", "TRANSPARENT"],
+        default="DEFAULT",
+        help="SVG background color (default: DEFAULT - transparent)"
+    )
+    
+    parser.add_argument(
+        "--stream",
+        action="store_true",
+        help="Stream progress chunks for progress indicator integration"
     )
     
     parser.add_argument(
@@ -147,7 +183,9 @@ def main():
                 input_path=dxf_path,
                 output_path=output_path,
                 lineweight_scaling=args.lineweight_scaling,
-                separate_layers=args.layers
+                separate_layers=args.layers,
+                background_color=args.background,
+                stream_callback=_create_stream_callback(args.stream) if args.stream else None
             )
             
             # Add conversion metrics to overall metrics

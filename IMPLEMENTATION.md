@@ -9,7 +9,9 @@ Successfully implemented a high-performance, standalone CLI tool for converting 
 - ✅ **CLI Interface**: Complete argument parser with all required flags
 - ✅ **DXF Support**: Native DXF to SVG conversion
 - ✅ **DWG Support**: ODA File Converter integration for DWG files
-- ✅ **Layer Separation**: Optional SVG group layers with `--layers` flag
+- ✅ **Layer Separation**: SVG group layers with `--layers` flag
+- ✅ **Background Color**: SVG background control with `--background` flag (DEFAULT, WHITE, BLACK, TRANSPARENT)
+- ✅ **Progress Streaming**: JSON progress events with `--stream` flag for integration with progress indicators
 - ✅ **Configurable Output**: `-o` flag for custom output path
 - ✅ **Lineweight Scaling**: Adjustable via `--lineweight-scaling` flag
 - ✅ **Performance Metrics**: Optional timing display with `--metrics` flag
