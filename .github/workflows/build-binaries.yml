@@ -29,7 +29,7 @@ jobs:
           Move-Item dist/ezdxf-convert.exe bin/ezdxf-convert-windows.exe
       
       - name: Upload Windows binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ezdxf-convert-windows
           path: bin/ezdxf-convert-windows.exe
@@ -57,7 +57,7 @@ jobs:
           chmod +x bin/ezdxf-convert-linux
       
       - name: Upload Linux binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ezdxf-convert-linux
           path: bin/ezdxf-convert-linux
@@ -85,7 +85,7 @@ jobs:
           chmod +x bin/ezdxf-convert-macos
       
       - name: Upload macOS binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ezdxf-convert-macos
           path: bin/ezdxf-convert-macos
