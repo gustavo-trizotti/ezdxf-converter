@@ -1,7 +1,7 @@
 """Core DXF to SVG conversion logic."""
 
 import ezdxf
-from ezdxf.addons.drawing import Frontend, RenderContext, layout
+from ezdxf.addons.drawing import Frontend, RenderContext, layout, properties
 from ezdxf.addons.drawing import svg as svg_backend
 from ezdxf.addons.drawing import config
 from pathlib import Path
@@ -10,6 +10,8 @@ import re
 
 
 def _apply_background_color(svg_string: str, background_color: str) -> str:
+    ezdxf.addons.drawing.properties.MODEL_SPACE_BG_COLOR = "#FFFFFF"
+
     """Apply background color to SVG string."""
     if background_color == "DEFAULT" or background_color == "TRANSPARENT":
         return svg_string
@@ -54,6 +56,8 @@ def _create_layer_groups(doc, msp, backend, svg_config) -> str:
     """Create SVG with layer groups instead of flat structure."""
     from io import StringIO
     import xml.etree.ElementTree as ET
+
+    ET.register_namespace('', "http://www.w3.org/2000/svg")  # Ensure default namespace is registered
     
     # Render standard SVG first
     Frontend(RenderContext(doc), backend, svg_config).draw_layout(msp)
@@ -143,19 +147,23 @@ def convert_dxf_to_svg(
     # Configure SVG backend
     svg_config = config.Configuration(
         min_lineweight=min_lineweight,
-        lineweight_scaling=lineweight_scaling
+        lineweight_scaling=lineweight_scaling,
+        background_policy=config.BackgroundPolicy.WHITE
     )
     
     # Render to SVG
     emit_event("render_start")
     start = time.perf_counter()
     backend = svg_backend.SVGBackend()
+    ctx = RenderContext(doc)
+
+    ctx.set_current_layout(msp)
     
     # Generate SVG with or without layer separation
     if separate_layers:
         svg_string = _create_layer_groups(doc, msp, backend, svg_config)
     else:
-        Frontend(RenderContext(doc), backend, svg_config).draw_layout(msp)
+        Frontend(ctx, backend, svg_config).draw_layout(msp)
         svg_string = backend.get_string(layout.Page(0, 0))
     
     metrics['render_svg'] = time.perf_counter() - start
